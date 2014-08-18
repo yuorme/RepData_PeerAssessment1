@@ -84,8 +84,8 @@ stepSum &lt;- ddply(actDF, .(date),
 <div id="part-2---mean-and-median" class="section level4">
 <h4>Part 2 - Mean and Median</h4>
 <p>To calculate the mean and median of the total number of steps daily:</p>
-<pre class="r"><code>medSteps &lt;- median(stepSum$dailySum)
-meanSteps &lt;- mean(stepSum$dailySum)</code></pre>
+<pre class="r"><code>medSteps &lt;- median(stepSum$dailySum, na.rm=TRUE)
+meanSteps &lt;- mean(stepSum$dailySum, na.rm=TRUE)</code></pre>
 <p>The <strong>mean</strong> total daily steps was <strong>9354.2295</strong>; the <strong>median</strong> total daily steps was <strong>10395</strong></p>
 </div>
 </div>
@@ -118,8 +118,8 @@ maxMean &lt;- intervalMean$interval[which.max(intervalMean$intMean)]</code></pre
 <h2>Imputing missing values</h2>
 <div id="part-1---total-number-of-missing-values" class="section level4">
 <h4>Part 1 - Total number of missing values</h4>
-<pre class="r"><code>naTotal &lt;- NROW(na.omit(actDF$steps))</code></pre>
-<p>The <strong>total number of missing values</strong> is <strong>15264</strong></p>
+<pre class="r"><code>naTotal &lt;- sum(is.na(actDF$steps))</code></pre>
+<p>The <strong>total number of missing values</strong> is <strong>2304</strong></p>
 </div>
 <div id="part-2-and-3---devise-a-strategy-for-filling-in-missing-values" class="section level4">
 <h4>Part 2 and 3 - Devise a strategy for filling in missing values</h4>

@@ -42,8 +42,8 @@ hist(stepSum$dailySum, col="red", ylab="Days", xlab="Total Steps (Daily)", main=
 
 To calculate the mean and median of the total number of steps daily:
 ```{r}
-medSteps <- median(stepSum$dailySum)
-meanSteps <- mean(stepSum$dailySum)
+medSteps <- median(stepSum$dailySum, na.rm=TRUE)
+meanSteps <- mean(stepSum$dailySum, na.rm=TRUE)
 ```
 The **mean** total daily steps was **`r meanSteps`**; the **median** total daily steps was **`r medSteps`**
 
@@ -78,7 +78,7 @@ The time interval in which the **maximum average steps** was taken is  **`r maxM
 
 #### Part 1 - Total number of missing values
 ```{r}
-naTotal <- NROW(na.omit(actDF$steps))
+naTotal <- sum(is.na(actDF$steps))
 ```
 The **total number of missing values** is  **`r naTotal`**
 
