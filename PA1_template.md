@@ -1,15 +1,11 @@
----
-output:
-  html_document:
-    keep_md: yes
----
 # Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
 Unzip() the activity.csv file and use read.csv() to generate an R dataframe
-```{r}
+
+```r
 setwd("~/coursera/lectures/5-ReproducibleResearch/Assignment1/RepData_PeerAssessment1")
 unzip("activity.zip")
 actDF <- read.csv("activity.csv")
@@ -19,7 +15,8 @@ since subsequent analyses focus on time series analyses, we'll be processing the
 1. Use sprintf() to print leading 0's in the \$interval column for conversion to 24-hour format.  
 2. Using strptime() to convert \$date and \$interval to time in the POSIXlt format  
 3. Generate day of the week information using the weekday() function  
-```{r}
+
+```r
 actDF$interval <- sprintf("%04d", actDF$interval)
 actDF$time <- strptime(actDF$interval, "%H%M")               
 actDF$datetime <- strptime(paste(actDF$date, actDF$interval), "%Y-%m-%d %H%M")
@@ -31,7 +28,8 @@ actDF$weekday <- weekdays(strptime(actDF$date, "%Y-%m-%d"), abbreviate=TRUE)
 #### Part 1 - Histogram
 
 Use the ddply() function in plyr to split by date, and obtain the total number of steps per day in the actDF dataframe:
-```{r, results="hide"}
+
+```r
 library(plyr)
 stepSum <- ddply(actDF, .(date),
       summarize,
@@ -39,18 +37,22 @@ stepSum <- ddply(actDF, .(date),
       )
 ```
 The following plots a histogram of the total number of steps taken daily:
-```{r}
+
+```r
 hist(stepSum$dailySum, col="red", ylab="Days", xlab="Total Steps (Daily)", main="Total Number of Steps Taken per Day")
 ```
+
+![plot of chunk unnamed-chunk-4](./PA1_template_files/figure-html/unnamed-chunk-4.png) 
 
 #### Part 2 - Mean and Median
 
 To calculate the mean and median of the total number of steps daily:
-```{r}
+
+```r
 medSteps <- median(stepSum$dailySum, na.rm=TRUE)
 meanSteps <- mean(stepSum$dailySum, na.rm=TRUE)
 ```
-The **mean** total daily steps was **`r meanSteps`**; the **median** total daily steps was **`r medSteps`**
+The **mean** total daily steps was **9354.2295**; the **median** total daily steps was **10395**
 
 
 ## What is the average daily activity pattern?
@@ -58,7 +60,8 @@ The **mean** total daily steps was **`r meanSteps`**; the **median** total daily
 #### Part 1 - Time Series Plot
 
 Use the ddply() function to split by interval, and obtain the mean number of steps at every 5-minute time interval in the actDF dataframe:
-```{r, results="hide"}
+
+```r
 library(plyr)
 intervalMean <- ddply(actDF, .(time),
       summarize,
@@ -66,32 +69,38 @@ intervalMean <- ddply(actDF, .(time),
       )
 ```
 The following plots a time-series of the mean number of steps per 5 minute interval
-```{r}
+
+```r
 plot(x=intervalMean$time, y=intervalMean$intMean, type="l", xlab="Time of Day (Hours)", ylab="Average Number of Steps", main="Mean Number of Steps per 5-minute Interval")
 ```
+
+![plot of chunk unnamed-chunk-7](./PA1_template_files/figure-html/unnamed-chunk-7.png) 
 
 #### Part 2 - Interval with the Maximum Average Steps
 1. Use the strftime() function to extract the 24-hour time from a POSIXlt object  
 2. find the row containing the max mean steps using which.max() and output the corresponding interval
-```{r, results="hide"}
+
+```r
 intervalMean$interval <- strftime(intervalMean$time, format="%H%M")
 maxMean <- intervalMean$interval[which.max(intervalMean$intMean)]
 ```
-The time interval in which the **maximum average steps** was taken is  **`r maxMean`**
+The time interval in which the **maximum average steps** was taken is  **0835**
 
 ## Imputing missing values
 
 #### Part 1 - Total number of missing values
-```{r}
+
+```r
 naTotal <- sum(is.na(actDF$steps))
 ```
-The **total number of missing values** is  **`r naTotal`**
+The **total number of missing values** is  **2304**
 
 #### Part 2 and 3 - Devise a strategy for filling in missing values
 
 I will be filling in NA values using the mean number of steps taken per 5 minute interval as calculated above. I've implemented this using two for loops to do the join which is computationally time-consuming. I've created this new dataset as the \$stepFIllNA column in the actDF dataframe. As a result, I've set cache=TRUE for this codeblock
 
-```{r, cache=TRUE}
+
+```r
 for (i in 1:NROW(actDF)) { #loops through every row in actDF
     if (is.na(actDF$steps[i])) { # if steps is NA
         for (j in 1:NROW(intervalMean)) { # loop through intervalMean to find corresponding interval
@@ -109,7 +118,8 @@ for (i in 1:NROW(actDF)) { #loops through every row in actDF
 #### Part 4 - Histogram and Mean and Median of Total Steps
 
 **Histogram** - Use the ddply() to split by date, and obtain the total number of steps per day for the $stepFillNA column. 
-```{r, results="hide"}
+
+```r
 library(plyr)
 stepFillNASum <- ddply(actDF, .(date),
       summarize,
@@ -117,23 +127,27 @@ stepFillNASum <- ddply(actDF, .(date),
       )
 ```
 The following plots a histogram of the total number of steps taken daily:
-```{r}
+
+```r
 hist(stepFillNASum$dailySum, col="green4", ylab="Days", xlab="Total Steps (Daily)", main="Total Number of Steps Taken per Day after Imputing Missing Values")
 ```
 
+![plot of chunk unnamed-chunk-12](./PA1_template_files/figure-html/unnamed-chunk-12.png) 
+
 **Mean and Median** of the total number of steps daily:
-```{r}
+
+```r
 medStepFillNA <- median(stepFillNASum$dailySum)
 meanStepFillNA <- mean(stepFillNASum$dailySum)
 ```
-The **mean** total daily steps was **`r meanStepFillNA`**; the **median** total daily steps was **`r medStepFillNA`**
+The **mean** total daily steps was **1.0766 &times; 10<sup>4</sup>**; the **median** total daily steps was **1.0766 &times; 10<sup>4</sup>**
 
 Imputing NA values shifted the histogram distribution towards the right, thereby making the values more normally distributed. This also had the effect of shifting the mean and median towards higher values.
 
 ## Are there differences in activity patterns between weekdays and weekends?  
 create factor variable  for weekday and weekends  
-```{r}
 
+```r
 for (d in 1:NROW(actDF)) {
   if (actDF$weekday[d] == "Sat" || actDF$weekday[d] == "Sun" ) {
     actDF$weekdayF[d] <- "weekend"
@@ -145,12 +159,14 @@ for (d in 1:NROW(actDF)) {
 ```
 
 aggregate interval mean by weekday and weekends
-```{r, results="hide"}
+
+```r
 intMeanWeekdayF <- aggregate(actDF$stepFillNA, list(interval = actDF$interval, weekdayF=actDF$weekdayF), mean)
 ```
  
 Use lattice plot to generate 2-panel plot for weekday and weekend 
-```{r}
+
+```r
  library(lattice)
  xyplot(x ~ as.numeric(interval) | weekdayF, 
       data=intMeanWeekdayF, type="l", 
@@ -158,4 +174,6 @@ Use lattice plot to generate 2-panel plot for weekday and weekend
       xlab="interval number", 
       main="Activity Patterns on Weekends vs. Weekdays",
       layout=c(1, 2))
- ```
+```
+
+![plot of chunk unnamed-chunk-16](./PA1_template_files/figure-html/unnamed-chunk-16.png) 
